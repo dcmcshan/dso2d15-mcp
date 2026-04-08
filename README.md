@@ -12,7 +12,11 @@ Waveform acquisition follows the same `PRIVate:WAVeform:DATA:ALL?` flow used in 
 - USB connection to the scope (rear USB device port)
 - OS support for USB-TMC via PyVISA:
   - **Linux**: often works with `usbcore` / `usbtmc` kernel driver or libusb stack used by `pyvisa-py`
-  - **macOS**: may require [NI-VISA](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html) or correct USB permissions; if `pyvisa-py` fails, try `DSO2D15_VISA_BACKEND=@ni` after installing NI-VISA
+  - **macOS**: install includes **`pyusb`** so `pyvisa-py` can enumerate USB-TMC. If discovery still fails, try [NI-VISA](https://www.ni.com/en/support/downloads/drivers/download.ni-visa.html) and `DSO2D15_VISA_BACKEND=@ni`.
+
+**DSO2D15 USB IDs** (matches VISA `USB0::1183::20574::…`): Vendor **0x049F** (1183), Product **0x505E** (20574). Example serial: `CN5546029098237` → resource like `USB0::1183::20574::CN5546029098237::0::INSTR`.
+
+If opening the instrument fails with **`usb.core.USBError: … Access denied (insufficient permissions)`** on macOS, `pyvisa-py` cannot claim the USB-TMC interface via libusb. Install **NI-VISA**, set `DSO2D15_VISA_BACKEND=@ni`, and use the NI resource string, or fix libusb access for that device (vendor docs / system USB policy).
 
 ## Install
 
