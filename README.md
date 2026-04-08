@@ -36,7 +36,7 @@ python -m dso2d15_mcp.server
 | Variable | Purpose |
 |----------|---------|
 | `DSO2D15_VISA` | Full VISA resource string, e.g. `USB0::0x049F::0x505E::...::INSTR` (use `dso2d15_list_visa_resources` to discover) |
-| `DSO2D15_VISA_QUERY` | Pattern for auto-pick when `DSO2D15_VISA` is unset. Default: `USB0::1183::20574::?*` (Hantek DSO2000 IDs used by common tooling) |
+| `DSO2D15_VISA_QUERY` | Pattern for auto-pick when `DSO2D15_VISA` is unset. Default: `USB0::1183::20574:?*` (Hantek DSO2000 IDs used by common tooling) |
 | `DSO2D15_TIMEOUT_MS` | VISA read timeout in ms (default `120000`; large captures can be slow) |
 | `DSO2D15_VISA_BACKEND` | PyVISA resource manager string (default `@py` for `pyvisa-py`) |
 

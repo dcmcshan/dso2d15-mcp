@@ -30,7 +30,7 @@ def _err(e: Exception) -> str:
 def dso2d15_list_visa_resources(query: str = "?*") -> str:
     """
     List VISA resource strings visible to PyVISA. Default query is all resources (?*).
-    For Hantek-only filtering, try query USB0::1183::20574::?* or set env DSO2D15_VISA_QUERY.
+    For Hantek-only filtering, try query USB0::1183::20574:?* or set env DSO2D15_VISA_QUERY.
     """
     try:
         rm = get_resource_manager()

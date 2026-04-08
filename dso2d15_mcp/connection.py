@@ -15,7 +15,7 @@ def visa_backend() -> str:
 
 def default_resource_query() -> str:
     # Matches Hantek DSO2000 USB identifiers used by community tools (see README).
-    return os.environ.get("DSO2D15_VISA_QUERY", "USB0::1183::20574::?*")
+    return os.environ.get("DSO2D15_VISA_QUERY", "USB0::1183::20574:?*")
 
 
 def default_resource_string() -> str | None:
