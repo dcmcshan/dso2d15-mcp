@@ -43,6 +43,7 @@ python -m dso2d15_mcp.server
 | `DSO2D15_VISA_QUERY` | Pattern for auto-pick when `DSO2D15_VISA` is unset. Default: `USB0::1183::20574:?*` (Hantek DSO2000 IDs used by common tooling) |
 | `DSO2D15_TIMEOUT_MS` | VISA read timeout in ms (default `120000`; large captures can be slow) |
 | `DSO2D15_VISA_BACKEND` | PyVISA resource manager string (default `@py` for `pyvisa-py`) |
+| `DSO2D15_SNAPSHOT_DIR` | Directory for BMP/SVG files from `dso2d15_measure_snapshot` (default: system temp) |
 
 ## Cursor MCP configuration
 
@@ -72,6 +73,8 @@ Add to your MCP settings (adjust the path):
 | `dso2d15_scpi_query` | ASCII query (responses that are not binary blocks) |
 | `dso2d15_scpi_query_binary` | Binary/block responses (returns length + base64 preview) |
 | `dso2d15_fetch_waveform` | High-level waveform JSON via `PRIVate:WAVeform:DATA:ALL?` |
+| `dso2d15_measure_vpp_frequency` | Automatic **Vpp** and **frequency** via `:MEASure:CHANnel<n>:ITEM?` |
+| `dso2d15_measure_snapshot` | Vpp + freq, optional BMP screen grab (best-effort), and **SVG waveform plot** path |
 
 Use `dso2d15_scpi_query` for interactive exploration (examples: `*IDN?`, `:CHANnel1:SCALe?`, `:TIMebase:MAIN:SCALe?`). Refer to the Hantek PDF for the full command set.
 

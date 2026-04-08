@@ -2,8 +2,11 @@
 
 from __future__ import annotations
 
+import base64
 import json
+import os
 import sys
+import tempfile
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
@@ -13,6 +16,12 @@ from dso2d15_mcp.connection import (
     get_resource_manager,
     list_usb_candidates,
     open_instrument,
+)
+from dso2d15_mcp.measurements import (
+    measure_vpp_frequency_scipi,
+    try_scpi_screen_bitmap,
+    waveform_derived_metrics,
+    write_waveform_svg,
 )
 from dso2d15_mcp.waveform import read_waveform, truncate_waveform
 
@@ -125,6 +134,67 @@ def dso2d15_scpi_query_binary(
             out["sha256"] = hashlib.sha256(raw).hexdigest()
         except Exception:
             pass
+        return json.dumps(out, indent=2)
+    except Exception as e:
+        return _err(e)
+
+
+@mcp.tool()
+def dso2d15_measure_vpp_frequency(
+    channel: int = 1,
+    resource: str | None = None,
+) -> str:
+    """
+    Read scope automatic measurements: Vpp and frequency for CH1–CH4 via SCPI
+    :MEASure:CHANnel<n>:ITEM? (DSO2000 manual). Ensures MEASure is ON first.
+    """
+    try:
+        inst = open_instrument(resource)
+        with inst:
+            m = measure_vpp_frequency_scipi(inst, channel=channel)
+        return json.dumps(m, indent=2)
+    except Exception as e:
+        return _err(e)
+
+
+@mcp.tool()
+def dso2d15_measure_snapshot(
+    channel: int = 1,
+    resource: str | None = None,
+    waveform_points: int = 4000,
+) -> str:
+    """
+    Measure Vpp and frequency (SCPI), try optional BMP screen grab, and save an SVG plot of the
+    waveform as a visual snapshot (DSO2000 manual has no guaranteed raster SCPI).
+    Returns JSON with paths, base64 BMP preview if any, SCPI values, and waveform-derived checks.
+    """
+    try:
+        out: dict[str, Any] = {}
+        tmpdir = os.environ.get("DSO2D15_SNAPSHOT_DIR") or tempfile.gettempdir()
+        os.makedirs(tmpdir, exist_ok=True)
+        inst = open_instrument(resource)
+        with inst:
+            out["measure_scpi"] = measure_vpp_frequency_scipi(inst, channel=channel)
+            wave = read_waveform(inst)
+            wave = truncate_waveform(wave, waveform_points)
+            out["waveform_derived"] = waveform_derived_metrics(wave, channel=channel)
+            svg_path = os.path.join(tmpdir, f"dso2d15_waveform_{channel}.svg")
+            out["waveform_svg_path"] = write_waveform_svg(wave, svg_path, channel=channel)
+
+            bmp = try_scpi_screen_bitmap(inst)
+            if bmp:
+                bmp_path = os.path.join(tmpdir, f"dso2d15_screen_{channel}.bmp")
+                with open(bmp_path, "wb") as f:
+                    f.write(bmp)
+                out["screenshot_bmp_path"] = bmp_path
+                out["screenshot_bmp_base64_preview"] = base64.b64encode(bmp[:512]).decode("ascii")
+            else:
+                out["screenshot_bmp_path"] = None
+                out["screenshot_note"] = (
+                    "No BMP from optional SCPI queries; DSO2000 manual has no standard screen dump. "
+                    "Use waveform_svg_path for a plot, or Save-to-USB on the scope for a true photo."
+                )
+
         return json.dumps(out, indent=2)
     except Exception as e:
         return _err(e)
